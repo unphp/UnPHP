@@ -51,7 +51,7 @@ class UnPHP_Controller_Error extends UnPHP_Controller_Abstract
                 exit();
         }
 
-        public function debugAction($exc)
+        public function debugAction($code,$msg,$file,$line,$trace_as_string)
         {
                 header('Status: 503 Not fond this page!');
                 $html = '<!DOCTYPE html>'."\r\n";
@@ -71,8 +71,11 @@ class UnPHP_Controller_Error extends UnPHP_Controller_Abstract
                 $html .= '<div class="main">'."\r\n";
                 $html .= '<div>'."\r\n";
                 $html .= "<h1>503</h1>"."\r\n";
-                $html .= '<p>Code::' . $exc->getCode().'</p>'."\r\n";
-                $html .= '<p>Message::' . $exc->getMsg().'</p>'."\r\n";
+                $html .= '<p>Code::' . $code.'</p>'."\r\n";
+                $html .= '<p>Message::' . $msg.'</p>'."\r\n";
+                $html .= '<p>File::' . $file.'</p>'."\r\n";
+                $html .= '<p>Line::' . $line.'</p>'."\r\n";
+                $html .= '<p>Info::' . $trace_as_string.'</p>'."\r\n";
                 $html .= '</div>'."\r\n";
                 $html .= '<div class="foot">'."\r\n";
                 $html .= '<p>'."\r\n";

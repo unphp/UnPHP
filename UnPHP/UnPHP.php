@@ -15,6 +15,7 @@
  * */
 class UnPHP
 {
+
         private static $_app = null;
         private static $_global_library = array();
         private $_config = null;
@@ -68,62 +69,42 @@ class UnPHP
         {
                 try
                 {
-                        if (isset($this->_config['app']['root']))
+                        $this->checkException(!isset($this->_config['app']['root']), 'UnPHP_Exception_StartupError', 'App\'s config params, "root" must set!');
+                        $bootstrapFile = $this->_config['app']['root'] . '/' . 'Bootstrap.php';
+                        $this->checkException(!file_exists($bootstrapFile), 'UnPHP_Exception_StartupError', 'App\'s bootstrap(Bootstrap.php) not found, in the dir ' . $this->_config['app']['root'] . ' !');
+                        $magicMethods = array(
+                            '__construct', '__destruct', '__call', '__callStatic',
+                            '__get', '__set', '__isset', '__unset',
+                            '__sleep', '__wakeup', '__toString', '__invoke',
+                            '__set_state', '__clone'
+                        );
+                        require $bootstrapFile;
+                        $bootstrap = new Bootstrap();
+                        $bootstrapRef = new ReflectionClass("Bootstrap");
+                        $methodList = $bootstrapRef->getMethods();
+                        foreach ($methodList as $methodTemp)
                         {
-                                $bootstrapFile = $this->_config['app']['root'] . '/' . 'Bootstrap.php';
-                                if (file_exists($bootstrapFile))
+                                $f = substr($methodTemp->name, 0, 1);
+                                if ('_' === $f && !in_array($methodTemp->name, $magicMethods))
                                 {
-                                        $magicMethods = array(
-                                            '__construct', '__destruct', '__call', '__callStatic',
-                                            '__get', '__set', '__isset', '__unset',
-                                            '__sleep', '__wakeup', '__toString', '__invoke',
-                                            '__set_state', '__clone'
-                                        );
-                                        require $bootstrapFile;
-                                        $bootstrap = new Bootstrap();
-                                        $bootstrapRef = new ReflectionClass("Bootstrap");
-                                        $methodList = $bootstrapRef->getMethods();
-                                        foreach ($methodList as $methodTemp)
+                                        $method = new ReflectionMethod($bootstrap, $methodTemp->name);
+                                        if (true === $method->isPublic())
                                         {
-                                                $f = substr($methodTemp->name, 0, 1);
-                                                if ('_' === $f && !in_array($methodTemp->name, $magicMethods))
+                                                if ($method->getParameters())
                                                 {
-                                                        $method = new ReflectionMethod($bootstrap, $methodTemp->name);
-                                                        if (true === $method->isPublic())
-                                                        {
-                                                                if ($method->getParameters())
-                                                                {
-                                                                        $bootstrap->{$methodTemp->name}($this->_dispatcher);
-                                                                }
-                                                                else
-                                                                {
-                                                                        $bootstrap->{$methodTemp->name}();
-                                                                }
-                                                        }
+                                                        $bootstrap->{$methodTemp->name}($this->_dispatcher);
+                                                }
+                                                else
+                                                {
+                                                        $bootstrap->{$methodTemp->name}();
                                                 }
                                         }
                                 }
-                                else
-                                {
-                                        throw new UnPHP_Exception_StartupError('App\'s bootstrap(Bootstrap.php) not found, in the dir ' . $this->_config['app']['root'] . ' !');
-                                }
-                        }
-                        else
-                        {
-                                throw new UnPHP_Exception_StartupError('App\'s config params, "root" must set!');
                         }
                 }
                 catch (UnPHP_Exception $exc)
                 {
-                        $err = new UnPHP_Controller_Error();
-                        if (isset($this->_config['app']['debug']) && $this->_config['app']['debug'] == 1)
-                        {
-                                $err->debugAction($exc);
-                        }
-                        else
-                        {
-                                $err->error404Action();
-                        }
+                        $exc->getMsg($this->_config['app']['debug'],new UnPHP_Controller_Error($this->_dispatcher->getRequest()));
                 }
                 return $this;
         }
@@ -137,56 +118,29 @@ class UnPHP
         {
                 try
                 {
-                        if ($this->_dispatcher->getRouter()->route($this->_dispatcher->getRequest())) // 路由分发成功
+                        // 判断路由是否成功
+                        $this->checkException(!$this->_dispatcher->getRouter()->route($this->_dispatcher->getRequest()), 'UnPHP_Exception_RouterFailed', 'Router matching failed!');
+                        $module_name = $this->_dispatcher->getRequest()->getModuleName();
+                        $controller_name = $this->_dispatcher->getRequest()->getControllerName();
+                        $action_name = $this->_dispatcher->getRequest()->getActionName();
+                        // 判断模块开关
+                        $this->checkException(!in_array($module_name, $this->_modules), 'UnPHP_Exception_LoadFailed_Module', 'App\'s config params, "module" not record now for you request module("' . $module_name . '") !');
+                        $app_root = $this->_config['app']['root'];
+                        $controller_path = 'controllers/' . ucfirst($controller_name) . '.php';
+                        $controller_file = 'index' === $module_name ? $app_root . '/' . $controller_path : $app_root . '/' . $module_name . '/' . $controller_path;
+                        $this->checkException(!file_exists($controller_file), 'UnPHP_Exception_LoadFailed', $controller_file . ', Not found this file!');
+                        include $controller_file;
+                        $controller = ucfirst($controller_name) . 'Controller';
+                        $action = $action_name . 'Action';
+                        $controller_obj = $this->checkClassMethod($controller, $action);
+                        if (is_object($controller_obj))
                         {
-                                $module_name = $this->_dispatcher->getRequest()->getModuleName();
-                                $controller_name = $this->_dispatcher->getRequest()->getControllerName();
-                                $action_name = $this->_dispatcher->getRequest()->getActionName();
-                                // 判断模块开关
-                                if (in_array($module_name, $this->_modules))
-                                {
-                                        $app_root = $this->_config['app']['root'];
-                                        $controller_path = 'controllers/' . ucfirst($controller_name) . '.php';
-                                        $controller_file = 'index' === $module_name ? $app_root . '/' . $controller_path : $app_root . '/' . $module_name . '/' . $controller_path;
-                                        if (file_exists($controller_file))
-                                        {
-                                                include $controller_file;
-                                                $controller = ucfirst($controller_name) . 'Controller';
-                                                $action = $action_name . 'Action';
-                                                $controller_obj = $this->checkClassMethod($controller, $action);
-                                                if (is_object($controller_obj))
-                                                {
-                                                        $controller_obj->$action();
-                                                }
-                                        }
-                                        else
-                                        {
-                                                throw new UnPHP_Exception_LoadFailed($controller_file . ', Not found this file!');
-                                        }
-                                }
-                                else
-                                {
-                                        // 模块不存在（未在app.modules里配置）
-                                        throw new UnPHP_Exception_LoadFailed_Module('App\'s config params, "module" not record now for you request module("' . $module_name . '") !');
-                                }
-                        }
-                        else
-                        {
-                                // 路由分发失败
-                                throw new UnPHP_Exception_RouterFailed('Router matching failed!');
+                                $controller_obj->$action();
                         }
                 }
                 catch (UnPHP_Exception $exc)
                 {
-                        $err = new UnPHP_Controller_Error($this->_dispatcher->getRequest());
-                        if (isset($this->_config['app']['debug']) && $this->_config['app']['debug'] == 1)
-                        {
-                                $err->debugAction($exc);
-                        }
-                        else
-                        {
-                                $err->error404Action();
-                        }
+                        $exc->getMsg($this->_config['app']['debug'],new UnPHP_Controller_Error($this->_dispatcher->getRequest()));
                 }
         }
 
@@ -198,18 +152,32 @@ class UnPHP
         private function init($confFile)
         {
                 $this->iniLoadFile();
-                $ReadConf = new Unphp_ReadConf($confFile);
-                $this->_config = $ReadConf->get();
-                $this->_modules = isset($this->_config['app']['modules']) ? explode(",", $this->_config['app']['modules']) : array();
-                self::$_app = $this;
-                $this->registerAutoLoad();
-                $request = new UnPHP_Request_Http();
-                // 设置默认模块/控制器/方法
-                isset($this->_config['app']['default_module']) ? $request->setDefaultModule($this->_config['app']['default_module']) : $request->setDefaultModule('index');
-                isset($this->_config['app']['default_controller']) ? $request->setDefaultController($this->_config['app']['default_controller']) : $request->setDefaultController('index');
-                isset($this->_config['app']['default_action']) ? $request->setDefaultAction($this->_config['app']['default_action']) : $request->setDefaultModule('index');
-                $this->_dispatcher = UnPHP_Dispatcher::getInstance();
-                $this->_dispatcher->setRequest($request);
+                try
+                {
+                        $ReadConf = new Unphp_ReadConf($confFile);
+                        $this->_config = $ReadConf->get();
+                        $this->_modules = isset($this->_config['app']['modules']) ? explode(",", $this->_config['app']['modules']) : array();
+                        self::$_app = $this;
+                        $this->registerAutoLoad();
+                        $request = new UnPHP_Request_Http();
+                        
+                        // 设置默认模块/控制器/方法
+                        isset($this->_config['app']['default_module']) ? $request->setDefaultModule($this->_config['app']['default_module']) : $request->setDefaultModule('index');
+                        isset($this->_config['app']['default_controller']) ? $request->setDefaultController($this->_config['app']['default_controller']) : $request->setDefaultController('index');
+                        isset($this->_config['app']['default_action']) ? $request->setDefaultAction($this->_config['app']['default_action']) : $request->setDefaultModule('index');
+                        $this->_dispatcher = UnPHP_Dispatcher::getInstance();
+                        $this->_dispatcher->setRequest($request);
+
+                        // 视图渲染
+                        $this->checkException(isset($this->_config['app']['cache_dir']),'UnPHP_Exception_StartupError','App\'s config "cache_dir" must set! ');
+                        $view_conf = array();
+                        $view = $this->_config['view']['cache_mode'] == 'redis' ? new UnPHP_View_Smarty() : new UnPHP_View_Smarty();
+                        $this->_dispatcher->setView($view);
+                }
+                catch (Exception $exc)
+                {
+                        $exc->getMsg($this->_config['app']['debug'],new UnPHP_Controller_Error($this->_dispatcher->getRequest()));
+                }
         }
 
         /**
@@ -246,27 +214,23 @@ class UnPHP
                 spl_autoload_register(array($auto, 'defaultAutoLoad'));
         }
 
+        private function checkException($bool, $exception_name, $message)
+        {
+                if ($bool)
+                {
+                        throw new $exception_name($message);
+                }
+        }
+
         private function checkClassMethod($class, $method)
         {
                 $rs = null;
                 $ref_class = new ReflectionClass($class);
-                if ($ref_class->hasMethod($method))
-                {
-                        $obj = new $class($this->_dispatcher->getRequest());
-                        $ref_method = new ReflectionMethod($obj, $method);
-                        if ($ref_method->isPublic())
-                        {
-                                $rs = $obj;
-                        }
-                        else
-                        {
-                                throw new UnPHP_Exception_LoadFailed_Action('This action("' . $method . '") not open permissions!');
-                        }
-                }
-                else
-                {
-                        throw new UnPHP_Exception_LoadFailed_Action('Not found this action("' . $method . '")!');
-                }
+                $this->checkException(!$ref_class->hasMethod($method), 'Not found this action("' . $method . '")!');
+                $obj = new $class($this->_dispatcher->getRequest());
+                $ref_method = new ReflectionMethod($obj, $method);
+                $this->checkException(!$ref_method->isPublic(), 'UnPHP_Exception_LoadFailed_Action', 'This action("' . $method . '") not open permissions!');
+                $rs = $obj;
                 return $rs;
         }
 

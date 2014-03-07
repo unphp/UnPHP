@@ -35,9 +35,9 @@ class UnPHP_Dispatcher
                 $this->_request = $request;
         }
 
-        public function setView()
+        public function setView(UnPHP_View_Interface $view)
         {
-                
+                $this->_view = $view;
         }
 
         public function setDefaultModule()

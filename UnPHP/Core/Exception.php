@@ -25,9 +25,16 @@ class UnPHP_Exception extends Exception
                 $this->message = $message;
         }
 
-        public function getMsg()
+        public function getMsg($debug,$err_controller)
         {
-                return parent::getMessage();
+                if ($debug || $err_controller->getRequest()->getQuery('debug')==1)
+                {
+                        $err_controller->debugAction($this->getCode(),$this->getMessage(),  $this->getFile(),  $this->getLine(),  $this->getTraceAsString());
+                }
+                else
+                {
+                        $err_controller->error404Action();
+                }
         }
 
 }
