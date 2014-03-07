@@ -11,13 +11,15 @@
  *
  * @author xiao
  */
-class UnPHP_View_Interface
+abstract class UnPHP_View_Abstract implements UnPHP_View_Interface
 {
-
         protected $_tpl_vars = array();
         protected $_script_path = null;
+}
+
+Interface UnPHP_View_Interface{
         
-        public function init($conf=array());
+        public function init($conf = array());
 
         public function render($view_path, $tpl_vars = NULL);
 

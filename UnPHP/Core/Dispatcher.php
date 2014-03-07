@@ -64,7 +64,6 @@ class UnPHP_Dispatcher
                 $this->_request = $request;
         }
 
-        
         /**
          * 设置视图引擎。
          * @author Xiao Tangren  <unphp@qq.com>
@@ -76,7 +75,17 @@ class UnPHP_Dispatcher
                 $this->_view = $view;
         }
 
-        
+        /**
+         * 获取视图引擎。
+         * @author Xiao Tangren  <unphp@qq.com>
+         * @data 2014-03-05
+         * @param UnPHP_View_Interface $view
+         */
+        public function getView()
+        {
+                return $this->_view;
+        }
+
         /**
          * 设置默认的“模块”。
          * @author Xiao Tangren  <unphp@qq.com>

@@ -104,7 +104,7 @@ class UnPHP
                 }
                 catch (UnPHP_Exception $exc)
                 {
-                        $exc->getMsg($this->_config['app']['debug'],$this->_dispatcher->getErrorController());
+                        $exc->getMsg($this->_config['app']['debug'], $this->_dispatcher->getErrorController());
                 }
                 return $this;
         }
@@ -141,7 +141,7 @@ class UnPHP
                 }
                 catch (UnPHP_Exception $exc)
                 {
-                        $exc->getMsg($this->_config['app']['debug'],$this->_dispatcher->getErrorController());
+                        $exc->getMsg($this->_config['app']['debug'], $this->_dispatcher->getErrorController());
                 }
         }
 
@@ -160,30 +160,30 @@ class UnPHP
                         $this->_config = $ReadConf->get();
                         $this->_modules = isset($this->_config['app']['modules']) ? explode(",", $this->_config['app']['modules']) : array();
                         self::$_app = $this;
-                        
+
                         // 注册“自动加载”接管函数
                         $this->registerAutoLoad();
                         $request = new UnPHP_Request_Http();
-                        
+
                         // 设置默认模块/控制器/方法
                         isset($this->_config['app']['default_module']) ? $request->setDefaultModule($this->_config['app']['default_module']) : $request->setDefaultModule('index');
                         isset($this->_config['app']['default_controller']) ? $request->setDefaultController($this->_config['app']['default_controller']) : $request->setDefaultController('index');
                         isset($this->_config['app']['default_action']) ? $request->setDefaultAction($this->_config['app']['default_action']) : $request->setDefaultModule('index');
-                        
+
                         $this->_dispatcher->setRequest($request);
                         $this->_dispatcher->setErrorController(new UnPHP_Error($request));
 
                         // 视图渲染
-                        $this->checkException(isset($this->_config['app']['cache_dir']),'UnPHP_Exception_StartupError','App\'s config "cache_dir" must set! ');
+                        $this->checkException(!isset($this->_config['app']['cache_dir']), 'UnPHP_Exception_StartupError', 'App\'s config "cache_dir" must set! ');
                         $view_conf = array();
                         $view = $this->_config['view']['cache_mode'] == 'redis' ? new UnPHP_View_Smarty() : new UnPHP_View_Smarty();
                         $this->_dispatcher->setView($view);
-                        
+
                         // 
                 }
                 catch (Exception $exc)
                 {
-                        $exc->getMsg($this->_config['app']['debug'],$this->_dispatcher->getErrorController());
+                        $exc->getMsg($this->_config['app']['debug'], $this->_dispatcher->getErrorController());
                 }
         }
 
@@ -206,7 +206,9 @@ class UnPHP
                 require $rootPath . $this->ds . 'Core' . $this->ds . 'Bootstrap_Abstract.php';
                 require $rootPath . $this->ds . 'Core' . $this->ds . 'Plugin_Abstract.php';
                 require $rootPath . $this->ds . 'Core' . $this->ds . 'Controller_Abstract.php';
+                require $rootPath . $this->ds . 'Core' . $this->ds . 'View_Abstract.php';
                 require $rootPath . $this->ds . 'Core' . $this->ds . 'Error.php';
+                require $rootPath . $this->ds . 'Ext' . $this->ds . 'View_Smarty.php';
         }
 
         /**
@@ -250,8 +252,8 @@ class UnPHP
         {
                 $rs = null;
                 $ref_class = new ReflectionClass($class);
-                $this->checkException(!$ref_class->hasMethod($method), 'Not found this action("' . $method . '")!');
-                $obj = new $class($this->_dispatcher->getRequest(),$this->_dispatcher->getView());
+                $this->checkException(!$ref_class->hasMethod($method), 'UnPHP_Exception_LoadFailed_Action', 'Not found this action("' . $method . '")!');
+                $obj = new $class($this->_dispatcher->getRequest(), $this->_dispatcher->getView());
                 $ref_method = new ReflectionMethod($obj, $method);
                 $this->checkException(!$ref_method->isPublic(), 'UnPHP_Exception_LoadFailed_Action', 'This action("' . $method . '") not open permissions!');
                 $rs = $obj;

@@ -13,7 +13,7 @@
  * @author Xiao Tangren  <unphp@qq.com>
  * @data 2014-03-05
  * */
-class UnPHP_View_Smarty extends UnPHP_View_Interface
+class UnPHP_View_Smarty extends UnPHP_View_Abstract
 {
 
         // 模板文件目录
