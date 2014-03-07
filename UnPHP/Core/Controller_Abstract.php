@@ -21,10 +21,17 @@ abstract class UnPHP_Controller_Abstract
         protected $_view;
         public $actions = array();
 
-        public final function __construct($request)
+        public final function __construct($request,$view)
         {
                 $this->_request = $request;
+                $this->_view = $view;
         }
+
+        public function init(){
+                
+        }
+
+        
 
         public function getModuleName()
         {
