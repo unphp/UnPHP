@@ -1,4 +1,4 @@
 UnPHP
 =====
 
-UnPHP is framework of PHP.
+UnPHP is a framework of PHP.
