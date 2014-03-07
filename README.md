@@ -4,7 +4,7 @@ UnPHP
 UnPHP is a framework of PHP.
 
 
-目录说明：
+框架目录说明：
 
 
 UnPHP：
@@ -18,7 +18,13 @@ UnPHP/Lib/             框架扩展类库目录
 UnPHP/Static/          框架静态文件目录
 
 
-应用测试目录说明：
+
+
+
+
+
+
+框架项目应用（测试）目录说明：
 
 test/                   项目主目录
 
@@ -35,3 +41,7 @@ test/www/Bootstrap.php  应用app（www）的初始引导文件
 test/index.php          项目入口文件
 
 test/rewrite.conf       项目nginx重写规则（单一入口）
+
+
+
+
