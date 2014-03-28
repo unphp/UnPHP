@@ -1,21 +1,11 @@
 <?php
 /**
-<<<<<<< HEAD:UnPHP/Core/View_Abstract.php
- * ÊÓÍ¼Àà
+ * è§†å›¾ç±»
  * @system UNPHP 
  * @version UNPHP 1.0
  * @author Xiao Tangren  <unphp@qq.com>
  * @data 2014-03-05
  * */
-=======
- * Description of View_Interface
- *
- * @author xiao
- */
-<<<<<<< HEAD:UnPHP/Core/View_Abstract.php
->>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf:UnPHP/Core/View_Abstract.php
-=======
->>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf:UnPHP/Core/View_Abstract.php
 abstract class UnPHP_View_Abstract implements UnPHP_View_Interface
 {
         protected $_tpl_vars = array();

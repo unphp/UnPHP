@@ -7,15 +7,7 @@
  * @author Xiao Tangren  <unphp@qq.com>
  * @data 2014-03-05
  * */
-<<<<<<< HEAD:UnPHP/Ext/View/FileSmarty.php
-<<<<<<< HEAD:UnPHP/Ext/View/FileSmarty.php
 class Ext_View_FileSmarty extends UnPHP_View_Abstract
-=======
-class UnPHP_View_Smarty extends UnPHP_View_Abstract
->>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf:UnPHP/Ext/View_Smarty.php
-=======
-class UnPHP_View_Smarty extends UnPHP_View_Abstract
->>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf:UnPHP/Ext/View_Smarty.php
 {
 
         // 模板文件目录

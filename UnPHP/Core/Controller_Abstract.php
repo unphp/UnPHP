@@ -18,27 +18,12 @@ abstract class UnPHP_Controller_Abstract
         {
                 $this->_request = $request;
                 $this->_view = $view;
-<<<<<<< HEAD
-<<<<<<< HEAD
         }
 
         public function init(){
                 
         }
 
-=======
-=======
->>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
-        }
-
-        public function init(){
-                
-        }
-
-<<<<<<< HEAD
->>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
-=======
->>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
         
 
         public function getModuleName()
