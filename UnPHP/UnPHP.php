@@ -169,9 +169,17 @@ class UnPHP
                         $this->_modules = isset($this->_config['app']['modules']) ? explode(",", $this->_config['app']['modules']) : array();
                         self::$_app = $this;
 <<<<<<< HEAD
+<<<<<<< HEAD
                         // 注册“自动加载”接管函数
                         $this->registerAutoLoad();
                         $request = new UnPHP_Request_Http();
+=======
+
+                        // 注册“自动加载”接管函数
+                        $this->registerAutoLoad();
+                        $request = new UnPHP_Request_Http();
+
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
 =======
 
                         // 注册“自动加载”接管函数
@@ -183,6 +191,7 @@ class UnPHP
                         isset($this->_config['app']['default_module']) ? $request->setDefaultModule($this->_config['app']['default_module']) : $request->setDefaultModule('index');
                         isset($this->_config['app']['default_controller']) ? $request->setDefaultController($this->_config['app']['default_controller']) : $request->setDefaultController('index');
                         isset($this->_config['app']['default_action']) ? $request->setDefaultAction($this->_config['app']['default_action']) : $request->setDefaultModule('index');
+<<<<<<< HEAD
 <<<<<<< HEAD
                         $this->_dispatcher->setRequest($request);
                         // 设置框架404异常页面
@@ -200,6 +209,10 @@ class UnPHP
 =======
 
                         $this->_dispatcher->setRequest($request);
+=======
+
+                        $this->_dispatcher->setRequest($request);
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
                         $this->_dispatcher->setErrorController(new UnPHP_Error($request));
 
                         // 视图渲染
@@ -209,6 +222,9 @@ class UnPHP
                         $this->_dispatcher->setView($view);
 
                         // 
+<<<<<<< HEAD
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
+=======
 >>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
                 }
                 catch (Exception $exc)
@@ -240,6 +256,10 @@ class UnPHP
                 require $rootPath . $this->ds . 'Core' . $this->ds . 'View_Abstract.php';
                 require $rootPath . $this->ds . 'Core' . $this->ds . 'Error.php';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                require $rootPath . $this->ds . 'Ext' . $this->ds . 'View_Smarty.php';
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
 =======
                 require $rootPath . $this->ds . 'Ext' . $this->ds . 'View_Smarty.php';
 >>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
@@ -253,6 +273,10 @@ class UnPHP
         private function registerAutoLoad()
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                //var_dump(self::$_global_library);
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
 =======
                 //var_dump(self::$_global_library);
 >>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
@@ -299,6 +323,9 @@ class UnPHP
                 }
 =======
                 $ref_class = new ReflectionClass($class);
+<<<<<<< HEAD
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
+=======
 >>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
                 $this->checkException(!$ref_class->hasMethod($method), 'UnPHP_Exception_LoadFailed_Action', 'Not found this action("' . $method . '")!');
                 $obj = new $class($this->_dispatcher->getRequest(), $this->_dispatcher->getView());

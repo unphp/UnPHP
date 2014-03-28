@@ -1,6 +1,9 @@
 <?php
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -8,6 +11,9 @@
  * and open the template in the editor.
  */
 
+<<<<<<< HEAD
+>>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
+=======
 >>>>>>> be3ceb0d38a20221c5cabaf67a91af80f7ce34cf
 /**
  * 框架默认的“异常/错误”等处理控制器
