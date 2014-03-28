@@ -1,13 +1,12 @@
 <?php
-
 /**
- * 应用引导（基础抽象类）
+ * 扩展异常
  * @system UNPHP 
  * @version UNPHP 1.0
  * @author Xiao Tangren  <unphp@qq.com>
  * @data 2014-03-05
  * */
-abstract class UnPHP_Bootstrap_Abstract
-{
-        //put your code here
+class SmartyException extends UnPHP_Exception{
+    //put your code here
+     protected $code = 2001;
 }

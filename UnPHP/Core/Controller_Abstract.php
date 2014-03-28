@@ -1,11 +1,4 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * 控制器基类
  * @system UNPHP 
@@ -21,14 +14,21 @@ abstract class UnPHP_Controller_Abstract
         protected $_view;
         public $actions = array();
 
-        public final function __construct($request)
+        public final function __construct($request,$view)
         {
                 $this->_request = $request;
+                $this->_view = $view;
         }
+
+        public function init(){
+                
+        }
+
+        
 
         public function getModuleName()
         {
-                
+                return $this->_request->getModuleName();
         }
 
         public function getRequest()
@@ -43,7 +43,7 @@ abstract class UnPHP_Controller_Abstract
 
         public function getView()
         {
-                
+            return $this->_view;
         }
 
 }

@@ -1,11 +1,4 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * 框架“应用配置”读取类
  * @system UNPHP 
@@ -15,7 +8,6 @@
  * */
 class Unphp_ReadConf
 {
-
         protected $iniFile = null;
         protected $conf = array();
 
@@ -40,24 +32,31 @@ class Unphp_ReadConf
                 $temp_key = "";
                 foreach ($list as $v)
                 {
-                        $pos = strpos($v, ";");
-                        if (false !== $pos)
+                        if(!empty($temp_key) && preg_match('/([\.a-zA-Z0-9\_\-]+)[\s]+=[\s]+"([^"]+)"/',$v,$arr))
                         {
-                                $v = trim(substr($v, 0, $pos));
+                                $value = preg_replace_callback('/{([a-zA-Z0-9\_]+)}/', 'self::callbackFun', $arr[2]);
+                                $this->getKey($rs[$temp_key], $arr[1], $value);
                         }
-                        if (!empty($v))
-                        {
-                                $arr1 = array();
-                                $arr2 = array();
-                                if (preg_match('/\[([a-zA-Z0-9\_\-]+)\]/i', $v, $arr1))
+                        else{
+                                $pos = strpos($v, ";");
+                                if (false !== $pos)
                                 {
-                                        $temp_key = $arr1[1];
-                                        continue;
+                                        $v = trim(substr($v, 0, $pos));
                                 }
-                                if (!empty($temp_key) && preg_match('/([a-zA-Z0-9\_\-]+)[\s]+=[\s]+(.*)/i', $v, $arr2))
+                                if (!empty($v))
                                 {
-                                        $value = preg_replace_callback('/{([a-zA-Z0-9\_]+)}/', 'self::callbackFun', $arr2[2]);
-                                        $rs[$temp_key][$arr2[1]] = $value;
+                                        $arr1 = array();
+                                        $arr2 = array();
+                                        if (preg_match('/\[([a-zA-Z0-9\_\-]+)\]/i', $v, $arr1))
+                                        {
+                                                $temp_key = $arr1[1];
+                                                continue;
+                                        }
+                                        if (!empty($temp_key) && preg_match('/([\.a-zA-Z0-9\_\-]+)[\s]+=[\s]+(.*)/i', $v, $arr2))
+                                        {
+                                                $value = preg_replace_callback('/{([a-zA-Z0-9\_]+)}/', 'self::callbackFun', $arr2[2]);
+                                                $this->getKey($rs[$temp_key], $arr2[1], $value);
+                                        }
                                 }
                         }
                 }
@@ -70,5 +69,16 @@ class Unphp_ReadConf
                 eval('?>' . '<?php $rs= ' . $macth[1] . ';?>');
                 return $rs;
         }
+        
+        protected function getKey(&$rs, $keystring, $v) {
+        $newarr = explode(".", $keystring);
+        if (count($newarr) > 1) {
+            $k = $newarr[0];
+            unset($newarr[0]);
+            $this->getKey($rs[$k], implode(".", $newarr),$v);
+        } else {
+            $rs[$keystring] = $v;
+        }
+    }
 
 }

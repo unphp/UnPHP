@@ -1,19 +1,13 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * 精简版Smarty视图引擎
+ * 缓存类型：文本
  * @system UNPHP 
  * @version UNPHP 1.0
  * @author Xiao Tangren  <unphp@qq.com>
  * @data 2014-03-05
  * */
-class UnPHP_View_Smarty extends UnPHP_View_Interface
+class Ext_View_FileSmarty extends UnPHP_View_Abstract
 {
 
         // 模板文件目录
@@ -52,17 +46,31 @@ class UnPHP_View_Smarty extends UnPHP_View_Interface
         {
                 $this->_errorlevel = error_reporting();
                 $this->_nowtime = time();
-                $this->cache_lifetime = isset($conf['cache_lifetime']) ? $conf['cache_lifetime'] : 3600;
-                $this->direct_output = isset($conf['direct_output']) ? $conf['direct_output'] : false;  // 不缓存，直接输出。。。
+                $this->cache_lifetime = isset($conf['lifetime']) ? $conf['lifetime'] : 3600;
+                $this->direct_output = !(isset($conf['caching']) ? $conf['caching'] : true);  // 不缓存，直接输出。。。
                 // 所谓编译缓存，指将模板smarty标签，翻译成php和html混合的文件后，生成的缓存。
-                $this->force_compile = isset($conf['force_compile']) ? $conf['force_compile'] : true;   // 默认开启编译缓存
-                $this->caching = isset($conf['caching']) ? $conf['caching'] : false;   // 默认开启静态缓存
+                $this->force_compile = isset($conf['compileCaching']) ? $conf['compileCaching'] : true;   // 默认开启编译缓存
+                $this->caching = isset($conf['htmlCaching']) ? $conf['htmlCaching'] : false;   // 默认开启静态缓存
                 if(!$this->direct_output && $this->caching){
-                       $this->cache_dir = rtrim($conf['cache_dir'], '/\\') . DIRECTORY_SEPARATOR;
+                       $this->cache_dir = rtrim($conf['tempPath'], '/\\') . DIRECTORY_SEPARATOR.'smarty' . DIRECTORY_SEPARATOR.'html' . DIRECTORY_SEPARATOR;
                 }
                 if(!$this->direct_output && $this->force_compile){
-                       $this->compile_dir = rtrim($conf['$compile_dir'], '/\\') . DIRECTORY_SEPARATOR;
+                       $this->compile_dir = rtrim($conf['tempPath'], '/\\') . DIRECTORY_SEPARATOR.'smarty' . DIRECTORY_SEPARATOR.'compile' . DIRECTORY_SEPARATOR;
                 }
+                if(!is_readable($conf['tempPath'])){
+                    throw new SmartyException('Invalid path provided,in that themes\'s dir of " '.$conf['tempPath'].' "!');
+                }
+                if (!is_readable($this->cache_dir)) {
+                    if (!@mkdir($this->cache_dir, 0777, TRUE)) {
+                        throw new SmartyException('There\'s not enough permissions for create file, in that temp\'s dir of ' . $conf['tempPath'] . '!');
+                    }
+                }
+                if (!is_readable($this->compile_dir)) {
+                    if (!@mkdir($this->compile_dir, 0777, TRUE)) {
+                        throw new SmartyException('There\'s not enough permissions for create file, in that temp\'s dir of ' . $conf['tempPath'] . '!');
+                    }
+                }
+                return true;
         }
 
         /**
@@ -76,11 +84,9 @@ class UnPHP_View_Smarty extends UnPHP_View_Interface
                 if (is_readable($path))
                 {
                         $this->template_dir = rtrim($path, '/\\') . DIRECTORY_SEPARATOR;
-                        ;
                         return;
                 }
-
-                throw new Exception('Invalid path provided');
+                throw new SmartyException('Invalid path provided,in that themes\'s dir of " '.$path.' "!');
         }
 
         /**
@@ -1468,7 +1474,7 @@ class UnPHP_View_Smarty extends UnPHP_View_Interface
         protected function getCachefilepath($filename, $cache_id)
         {
                 $pathinfo = pathinfo($filename);
-                $dir = str_repeat($pathinfo['basename'], '', $filename);
+                $dir = str_replace($pathinfo['basename'], '', $filename);
                 $filename = str_replace(DIRECTORY_SEPARATOR, '_', $filename);
                 $cachename = basename($filename, strrchr($filename, '.')) . $cache_id;
                 $hash_dir = $this->cache_dir . $dir . substr(md5($cachename), 0, 2) . '/' . substr(md5($cachename), 3, 2);
