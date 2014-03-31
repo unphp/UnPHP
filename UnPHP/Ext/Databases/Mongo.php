@@ -12,7 +12,7 @@ class Ext_Databases_Mongo {
     private $pool = null;
     private $collectionMap = array();
 
-    public function __construct($pool) {
+    public function __construct($pool,$engineType) {
         $this->pool = $pool;
     }
 
@@ -65,7 +65,11 @@ class Ext_Databases_Mongo {
         return $documents;
     }
 
-    public function insert() {
+    public function insert($collectionName, $new, $options = array()) {
+        
+    }
+    
+    public function batchInsert($collectionName, $new, $options = array()) {
         
     }
 

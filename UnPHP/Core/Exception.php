@@ -20,7 +20,7 @@ class UnPHP_Exception extends Exception
 
         public function getMsg($debug,$err_controller)
         {
-                if ($debug || $err_controller->getRequest()->getQuery('debug')==1)
+                if ($debug || $err_controller->getRequest()->getQuery('debug')>=1)
                 {
                         $err_controller->debugAction($this->getCode(),$this->getMessage(),  $this->getFile(),  $this->getLine(),  $this->getTraceAsString());
                 }

@@ -8,5 +8,5 @@
  * */
 class SmartyException extends UnPHP_Exception{
     //put your code here
-     protected $code = 2001;
+     protected $code = 2002;
 }

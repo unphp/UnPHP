@@ -163,8 +163,14 @@ class UnPHP
                 {       
                         $ReadConf = new Unphp_ReadConf($confFile);
                         $this->_config = $ReadConf->get();
-                        if($this->_config['app']['debug']){
-                            error_reporting(E_ERROR | E_PARSE | E_CORE_ERROR| E_COMPILE_ERROR | E_RECOVERABLE_ERROR);
+                        switch ($this->_config['app']['debug']) {
+                            case 1:
+                                error_reporting(E_ERROR | E_PARSE | E_CORE_ERROR| E_COMPILE_ERROR | E_RECOVERABLE_ERROR);
+                                break;
+                            case 2 :
+                                error_reporting(E_ALL);
+                            default:
+                                error_reporting(0);
                         }
                         $this->_modules = isset($this->_config['app']['modules']) ? explode(",", $this->_config['app']['modules']) : array();
                         self::$_app = $this;

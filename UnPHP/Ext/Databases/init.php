@@ -28,6 +28,7 @@ require __DIR__ . DIRECTORY_SEPARATOR . 'Pdo.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'Mongo.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'Pool.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'Model.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'DatabasesException.php';
 
 function ext_databases_init(UnPHP $app, UnPHP_Dispatcher $dispatcher) {
     $conf = $app->getConfig();
