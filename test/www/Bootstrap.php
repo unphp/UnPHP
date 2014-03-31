@@ -8,23 +8,16 @@
  * @author Xiao Tangren  <unphp@qq.com>
  * @data 2013-10-28
  */
-class Bootstrap extends UnPHP_Bootstrap_Abstract
-{
+class Bootstrap extends UnPHP_Bootstrap_Abstract {
 
     /**
-     * 定义“本地类”
+     * 注册路由协议
      * @author Xiao Tangren  <unphp@qq.com>
      * @param Yaf_Dispatcher $dispatcher
      */
-    public function _initRoute(UnPHP_Dispatcher $dispatcher)
-    {
-            $default_route = new UnPHP_Route_Simple("m",'c','a');
-            $dispatcher->getRouter()->addRoute('default',$default_route);
+    public function _initRoute(UnPHP_Dispatcher $dispatcher) {
+        $default_route = new UnPHP_Route_Simple("m", 'c', 'a');
+        $dispatcher->getRouter()->addRoute('simple', $default_route);
     }
     
-    public function _initLocalNames()
-    {
-            
-    }
-
 }

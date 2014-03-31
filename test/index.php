@@ -13,7 +13,7 @@ require APPLICATION_PATH . '/../UnPHP/UnPHP.php';
 // 设置公共库路径
 UnPHP::setLibrary(APPLICATION_PATH . '/library');
 // 创建（框架）应用
-$UnPHP = new UnPHP(APPLICATION_PATH . '/conf/common.ini');
+$UnPHP = new UnPHP(APPLICATION_PATH . '/conf/www.ini');
 // 初始化应用，并执行应用
 $UnPHP->bootstrap()->run();
 

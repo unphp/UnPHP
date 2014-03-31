@@ -17,7 +17,10 @@ class IndexController extends UnPHP_Controller_Abstract
         //put your code here
         public function indexAction()
         {
-                echo 'Hello,world!';
+            $view = $this->getView();
+            $view->assign('meta_link','test');
+            $view->display('/index.tpl');
+            
         }
 
         public function infoAction()
