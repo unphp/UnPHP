@@ -18,11 +18,13 @@ class UnPHP_Request_Http extends UnPHP_Request_Abstract
         {
                 if (empty($name))
                 {
-                        return $_GET;
+                        return array_merge($_GET, $this->getParam());
                 }
                 else
                 {
-                        return isset($_GET[$name]) ? $_GET[$name] : null;
+                        $v = isset($_GET[$name]) ? $_GET[$name] : null;
+                        $v = null!==$v ?  $v : $this->getParam($name);
+                        return $v;
                 }
         }
 

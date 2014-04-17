@@ -148,6 +148,22 @@ class UnPHP
                         $exc->getMsg($this->_config['app']['debug'], $this->_dispatcher->getErrorController());
                 }
         }
+        
+        public function extInit()
+        {
+                // 加载框架扩展库
+                if (isset($this->_config['ext']))
+                {
+                        foreach ($this->_config['ext'] as $k => $v)
+                        {
+                                $init = isset($this->_config[$k]['path']) ? $this->_config[$k]['path'] . $this->ds . 'init.php' : __DIR__ . $this->ds . 'Ext' . $this->ds . ucfirst($k) . $this->ds . 'init.php';
+                                require $init;
+                                $initFunc = 'ext_' . $k . '_init';
+                                $initFunc($this, $this->_dispatcher);
+                        }
+                }
+                return $this;
+        }
 
         /**
          * 初始化框架
@@ -184,22 +200,14 @@ class UnPHP
                         $this->_dispatcher->setRequest($request);
                         // 设置框架404异常页面
                         $this->_dispatcher->setErrorController(new UnPHP_Error($request));
-                        // 加载框架扩展库
-                        if (isset($this->_config['ext']))
-                        {
-                            foreach ($this->_config['ext'] as $k=>$v){
-                                $init = isset($this->_config[$k]['path']) ? $this->_config[$k]['path'].$this->ds.'init.php':__DIR__ . $this->ds . 'Ext' . $this->ds .ucfirst($k).$this->ds. 'init.php';
-                                require $init;
-                                $initFunc = 'ext_'.$k.'_init';
-                                $initFunc($this,$this->_dispatcher);
-                            }
-                        }
+                        $this->extInit();
                 }
                 catch (Exception $exc)
                 {
                         $exc->getMsg($this->_config['app']['debug'], $this->_dispatcher->getErrorController());
                 }
         }
+        
 
         /**
          * 载入框架核心类文件

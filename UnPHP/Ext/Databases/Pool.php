@@ -88,7 +88,7 @@ class PoolClient {
                     if (null != $this->port) {
                         $dsn .=";port=" . $this->port;
                     }
-                    $this->client = new Ext_Databases_Pdo(new PDO($dsn, $this->user, $this->password),$this->engine);
+                    $this->client = new Ext_Databases_Pdo(new PDO($dsn, $this->user, $this->password,array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'")),$this->engine);
                     break;
                 case 'mongodb':
                     $dsn = 'mongodb://' . $this->user . ':password@' . $this->host . ':' . $this->port;

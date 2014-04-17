@@ -40,6 +40,8 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
         public $filename = array();
         // 静态缓存文件“是否存在”
         protected $cached = false;
+        protected $_start_tag = '{';
+        protected $_end_tag = '}';
         static public $smarty = null;
 
         public function init($conf = array())
@@ -52,13 +54,19 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
                 $this->force_compile = isset($conf['compileCaching']) ? $conf['compileCaching'] : true;   // 默认开启编译缓存
                 $this->caching = isset($conf['htmlCaching']) ? $conf['htmlCaching'] : false;   // 默认开启静态缓存
                 if(!$this->direct_output && $this->caching){
-                       $this->cache_dir = rtrim($conf['tempPath'], '/\\') . DIRECTORY_SEPARATOR.'smarty' . DIRECTORY_SEPARATOR.'html' . DIRECTORY_SEPARATOR;
+                       $this->cache_dir = rtrim($conf['tempPath'], '/\\')  . DIRECTORY_SEPARATOR.'html' . DIRECTORY_SEPARATOR;
                 }
                 if(!$this->direct_output && $this->force_compile){
-                       $this->compile_dir = rtrim($conf['tempPath'], '/\\') . DIRECTORY_SEPARATOR.'smarty' . DIRECTORY_SEPARATOR.'compile' . DIRECTORY_SEPARATOR;
+                       $this->compile_dir = rtrim($conf['tempPath'], '/\\')  . DIRECTORY_SEPARATOR.'compile' . DIRECTORY_SEPARATOR;
                 }
+                
+                $this->_start_tag = $this->escapeTag(isset($conf['startTag']) ? $conf['startTag'] : '{');   // 开始标签
+                $this->_end_tag = $this->escapeTag(isset($conf['endTag']) ? $conf['endTag'] : '}');         // 结束标签
+                
                 if(!is_readable($conf['tempPath'])){
-                    throw new SmartyException('Invalid path provided,in that themes\'s dir of " '.$conf['tempPath'].' "!');
+                        if (!@mkdir($conf['tempPath'], 0777, TRUE)) {
+                                throw new SmartyException('Invalid path provided,in that themes\'s dir of " '.$conf['tempPath'].' "!');
+                        }
                 }
                 if (!is_readable($this->cache_dir)) {
                     if (!@mkdir($this->cache_dir, 0777, TRUE)) {
@@ -81,12 +89,18 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
          */
         public function setScriptPath($path)
         {
-                if (is_readable($path))
+                try
                 {
-                        $this->template_dir = rtrim($path, '/\\') . DIRECTORY_SEPARATOR;
-                        return;
+                        if (is_readable($path))
+                        {
+                                $this->template_dir = rtrim($path, '/\\') . DIRECTORY_SEPARATOR;
+                                return;
+                        }
                 }
-                throw new SmartyException('Invalid path provided,in that themes\'s dir of " '.$path.' "!');
+                catch (Exception $exc)
+                {
+                        throw new SmartyException('Invalid path provided,in that themes\'s dir of " ' . $path . ' "!'.$exc->getMessage());
+                }
         }
 
         /**
@@ -110,7 +124,25 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
                 return $this->fetch($name, $value);
         }
 
-        
+        /**
+         * 处理字符串函数
+         * @author Xiao Tangren  <unphp@qq.com>
+         * @data 2014-03-05
+         * @access  public
+         * @param   string     $source
+         * @return  sring
+         */
+        public function fetch_str($source)
+        {
+                $source = preg_replace("/<\?[^><]+\?>|<\%[^><]+\%>|<script[^>]+language[^>]*=[^>]*php[^>]*>[^><]*<\/script\s*>/iU", "", $source);
+                //smarty的注释语法
+
+                $source = preg_replace("/" . $this->_start_tag . "\*.*?\*" . $this->_end_tag . "/is", "", $source);
+                //$source = preg_replace("/<\%[^><]+\%>|<script[^>]+language[^>]*=[^>]*php[^>]*>[^><]*<\/script\s*>/iU", "", $source);
+                //smarty 起始标签
+                return preg_replace_callback("/" . $this->_start_tag . "([^" . $this->_start_tag . $this->_end_tag . "\n]*)" . $this->_end_tag . "/", "self::callback_select", $source);
+        }
+
         /**
          * 注册变量
          * @author Xiao Tangren  <unphp@qq.com>
@@ -332,23 +364,6 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
                 ob_end_clean();
 
                 return $content;
-        }
-
-        /**
-         * 处理字符串函数
-         * @author Xiao Tangren  <unphp@qq.com>
-         * @data 2014-03-05
-         * @access  public
-         * @param   string     $source
-         * @return  sring
-         */
-        public function fetch_str($source)
-        {
-                $source = preg_replace("/<\?[^><]+\?>|<\%[^><]+\%>|<script[^>]+language[^>]*=[^>]*php[^>]*>[^><]*<\/script\s*>/iU", "", $source);
-                //smarty的注释语法
-                $source = preg_replace("/\{\*.*?\*\}/is", "", $source);
-                //$source = preg_replace("/<\%[^><]+\%>|<script[^>]+language[^>]*=[^>]*php[^>]*>[^><]*<\/script\s*>/iU", "", $source);
-                return preg_replace_callback("/{([^\}\{\n]*)}/", "self::callback_select", $source);
         }
 
         /**
@@ -590,7 +605,6 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
                                 case '_php':
                                         return '<?php ';
                                         break;
-
                                 case 'num_float_rand':
                                         $t = $this->get_para(substr($tag, 9), 0);
                                         $min = intval($t['min']);
@@ -598,7 +612,6 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
                                         $f = intval($t['f']);
                                         return '<?php printf("%.' . $f . 'f",' . $min . '+ mt_rand() / mt_getrandmax()*(' . $max . '-' . $min . ')); ?>';
                                         break;
-
                                 default:
                                         return '{' . $tag . '}';
                                         break;
@@ -1502,6 +1515,15 @@ class Ext_View_FileSmarty extends UnPHP_View_Abstract
                         trigger_error('can\'t write:' . $cachefile);
                 }
                 return $out;
+        }
+        
+        protected function escapeTag($tag){
+                $escapeList = array('{','}');
+                foreach ($escapeList as $value)
+                {
+                        $tag = str_replace($value, '\\'.$value, $tag);
+                }
+                return $tag;
         }
 
 }

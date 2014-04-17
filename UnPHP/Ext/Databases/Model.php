@@ -16,6 +16,9 @@ class Ext_Databases_Model
         protected $_new = array();
         protected $_isNew = TRUE;
         protected static $poolConf = array();
+        protected $_error = null;
+        protected $_validation = array();
+        protected $_validaObj = null;
 
         const ACTION_READ = 1;
         const ACTION_WRITE = 2;
@@ -23,14 +26,23 @@ class Ext_Databases_Model
 
         protected static function getReadEngine($tableName)
         {
-                $conf = static::$poolConf[$tableName][static::ACTION_READ];
-                return Ext_Databases_Pool::getWritePool($tableName, $conf[0], $conf[1], $conf[2]);
+                if (isset(static::$poolConf[$tableName][static::ACTION_WRITE]))
+                {
+                        $conf = static::$poolConf[$tableName][static::ACTION_READ];
+                        return Ext_Databases_Pool::getWritePool($tableName, $conf[0], $conf[1], $conf[2]);
+                }
+                throw new DatabasesException('The table of "' . $tableName . '" not config for Read Databases of Engine!');
         }
 
         protected static function getWriteEngine($tableName)
         {
-                $conf = static::$poolConf[$tableName][static::ACTION_WRITE];
-                return Ext_Databases_Pool::getWritePool($tableName, $conf[0], $conf[1], $conf[2]);
+                if (isset(static::$poolConf[$tableName][static::ACTION_WRITE]))
+                {
+                        $conf = static::$poolConf[$tableName][static::ACTION_WRITE];
+                        return Ext_Databases_Pool::getWritePool($tableName, $conf[0], $conf[1], $conf[2]);
+                }
+
+                throw new DatabasesException('The table of "' . $tableName . '" not config for Write Databases of Engine!');
         }
 
         public static function regionPool($table, $dsn, $user, $password, $action = self::ACTION_BOTH)
@@ -76,11 +88,62 @@ class Ext_Databases_Model
         {
                 $this->_attributes = $attributes;
                 $this->_isNew = $isNew;
+                $this->_error = array();
+                $this->_validaObj = new Ext_Databases_Validation($this);
         }
 
         public function getTableName()
         {
                 return $this->_tableName;
+        }
+
+        public function rules()
+        {
+                return array(
+                );
+        }
+
+        public function validation($data)
+        {
+                $rs = true;
+                $rules = $this->rules();
+                if (!empty($rules))
+                {
+                        foreach ($rules as $rule)
+                        {
+                                if (is_array($rule) && count($rule) > 1)
+                                {
+                                        if (isset($this->_validation[$rule[1]]))
+                                        {
+                                                $valida = $this->_validation[$rule[1]]($data, $rule);
+                                                if (true !== $valida)
+                                                {
+                                                        $this->_error[] = $valida;
+                                                        $rs = false;
+                                                }
+                                        }
+                                        else
+                                        {
+                                                $valida = $this->_validaObj->$rule[1]($data, $rule);
+                                                if (true !== $valida)
+                                                {
+                                                        $rs = false;
+                                                }
+                                        }
+                                }
+                        }
+                }
+                return $rs;
+        }
+
+        public function addError($err)
+        {
+                $this->_error[] = $err;
+        }
+
+        public function getError()
+        {
+                return $this->_error;
         }
 
         public function getPk()
@@ -107,16 +170,21 @@ class Ext_Databases_Model
                 }
         }
 
-        public function getAttributes()
+        public function getAttributes($key = null)
         {
+                if ($key)
+                {
+                        return $this->_attributes[$key];
+                }
                 return $this->_attributes;
         }
 
         public function findOne($condition = array(), $options = array())
         {
-                if ($this->_attributes)
+                $data = static::getReadEngine($this->_tableName)->conn()->findOne($this->_tableName, $condition, $options);
+                if ($data)
                 {
-                        $this->_attributes = static::getReadEngine($this->_tableName)->conn()->findOne($this->_tableName, $condition, $options);
+                        $this->_attributes = $data;
                         $this->_isNew = $this->_attributes ? FALSE : TRUE;
                         return $this;
                 }
@@ -154,7 +222,17 @@ class Ext_Databases_Model
 
         public function insert($new, $options = array())
         {
-                return static::getWriteEngine($this->_tableName)->conn()->insert($this->_tableName, $new, $options);
+                if ($this->validation($new))
+                {
+                        $data = static::getWriteEngine($this->_tableName)->conn()->insert($this->_tableName, $new, $options);
+                        if ($data)
+                        {
+                                $this->_attributes = static::getReadEngine($this->_tableName)->conn()->findOne($this->_tableName, $condition, $options);
+                                $this->_isNew = $this->_attributes ? FALSE : TRUE;
+                                return $this;
+                        }
+                }
+                return $data;
         }
 
         public function batchInsert($new, $options = array())
