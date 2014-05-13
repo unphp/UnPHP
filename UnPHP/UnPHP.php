@@ -123,7 +123,7 @@ class UnPHP
                 try
                 {
                         // 判断路由是否成功
-                        $this->checkException(!$this->_dispatcher->getRouter()->route($this->_dispatcher->getRequest()), 'UnPHP_Exception_RouterFailed', 'Router matching failed!');
+                        $this->_dispatcher->route();
                         $module_name = $this->_dispatcher->getRequest()->getModuleName();
                         $controller_name = $this->_dispatcher->getRequest()->getControllerName();
                         $action_name = $this->_dispatcher->getRequest()->getActionName();
@@ -240,7 +240,7 @@ class UnPHP
          */
         private function registerAutoLoad()
         {
-                $auto = new Unphp_AutoLoad($this->_config["app"]["library"], self::$_global_library);
+                $auto = new Unphp_AutoLoad(__DIR__,$this->_config["app"]["library"], self::$_global_library);
                 spl_autoload_register(array($auto, 'defaultAutoLoad'));
         }
 

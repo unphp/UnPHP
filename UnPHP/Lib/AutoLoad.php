@@ -12,9 +12,11 @@ class Unphp_AutoLoad
         //put your code here
         private $common_library = null;
         private $app_library = null;
+        private $unphpPath = null;
 
-        public function __construct($appLibrary, $commonLibrary = null)
+        public function __construct($unphpPath,$appLibrary, $commonLibrary = null)
         {
+                $this->unphpPath = $unphpPath;
                 $this->common_library = $commonLibrary;
                 $this->app_library = $appLibrary;
         }
@@ -47,6 +49,13 @@ class Unphp_AutoLoad
                                         return;
                                 }
                         }
+                }
+                // 最后考虑加载框架内置库文件
+                $unphpClass = $this->unphpPath . $after . '/' . $className . '.php';
+                if (file_exists($unphpClass))
+                {
+                        include $unphpClass;
+                        return;
                 }
         }
 

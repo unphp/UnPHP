@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 应用调度分配
  * @system UNPHP 
@@ -18,6 +19,7 @@ class UnPHP_Dispatcher
         private $_default_module;
         private $_default_controller;
         private $_default_action;
+        private $_route = false;
 
         public function __construct()
         {
@@ -142,6 +144,25 @@ class UnPHP_Dispatcher
                         $this->_router = new UnPHP_Router();
                 }
                 return $this->_router;
+        }
+
+        public function route()
+        {
+                if (!$this->_route)
+                {
+                        $this->_route = true;
+                        try
+                        {
+                                if (!$this->getRouter()->route($this->_request))
+                                {
+                                        throw new UnPHP_Exception_RouterFailed('Router matching failed!');
+                                }
+                        }
+                        catch (UnPHP_Exception $exc)
+                        {
+                                $exc->getMsg($this->_config['app']['debug'], $this->_dispatcher->getErrorController());
+                        }
+                }
         }
 
         /**

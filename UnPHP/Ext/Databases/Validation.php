@@ -24,6 +24,7 @@ class Ext_Databases_Validation
          */
         public function required($data, $rule)
         {
+                $filedsLan = $this->_model->fileds();
                 $rs = true;
                 $fileds = explode(",", $rule[0]);
                 foreach ($fileds as $filed)
@@ -31,7 +32,8 @@ class Ext_Databases_Validation
                         if (!isset($data[$filed]) || $data[$filed]=="")
                         {
                                 $rs = false;
-                                $this->_model->addError('Filed\'s "' . $filed . '" must set value!');
+                                $name = isset($filedsLan[$filed])?$filedsLan[$filed]:$filed;
+                                $this->_model->addError('Filed\'s "' . $name . '" must set value!');
                         }
                 }
                 return $rs;
@@ -46,6 +48,7 @@ class Ext_Databases_Validation
         public function intcal($data, $rule)
         {
                 $rs = true;
+                $filedsLan = $this->_model->fileds();
                 $fileds = explode(",", $rule[0]);
                 foreach ($fileds as $filed)
                 {
@@ -56,7 +59,8 @@ class Ext_Databases_Validation
                         if (!preg_match('/^\s*[+-]?\d+\s*$/', "$data[$filed]"))
                         {
                                 $rs = false;
-                                $this->_model->addError('The Value of Filed\'s "' . $filed . '" must is Int !');
+                                $name = isset($filedsLan[$filed])?$filedsLan[$filed]:$filed;
+                                $this->_model->addError('The Value of Filed\'s "' . $name . '" must is Int !');
                         }
                 }
                 return $rs;
@@ -71,6 +75,7 @@ class Ext_Databases_Validation
         public function length($data, $rule)
         {
                 $rs = true;
+                $filedsLan = $this->_model->fileds();
                 $fileds = explode(",", $rule[0]);
                 foreach ($fileds as $filed)
                 {
@@ -82,12 +87,14 @@ class Ext_Databases_Validation
                         if (!empty($rule['max']) && $length > $rule['max'])
                         {
                                 $rs = false;
-                                $this->_model->addError('The Value of Filed\'s "' . $filed . '" can not more than ' . $length . ' char !');
+                                $name = isset($filedsLan[$filed])?$filedsLan[$filed]:$filed;
+                                $this->_model->addError('The Value of Filed\'s "' . $name . '" can not more than ' . $length . ' char !');
                         }
                         if (!empty($rule['min']) && $length < $rule['min'])
                         {
                                 $rs = false;
-                                $this->_model->addError('The Value of Filed\'s "' . $filed . '" must more than ' . $length . ' char !');
+                                $name = isset($filedsLan[$filed])?$filedsLan[$filed]:$filed;
+                                $this->_model->addError('The Value of Filed\'s "' . $name . '" must more than ' . $length . ' char !');
                         }
                 }
                 return $rs;

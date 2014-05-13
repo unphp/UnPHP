@@ -126,8 +126,7 @@ class Ext_Databases_Pdo
                         //var_dump($this->getInsertSql($collectionName, $fileds),$data);exit;
                         if ($sth->execute($data))
                         {
-                                $rs[$fileds['auto_key_id']] = $this->pool->lastInsertId();
-                                return $rs;
+                                return $this->pool->lastInsertId();
                         }
                         else
                         {

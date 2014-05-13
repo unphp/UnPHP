@@ -19,6 +19,7 @@ class Ext_Databases_Model
         protected $_error = null;
         protected $_validation = array();
         protected $_validaObj = null;
+        protected $_pk = null;
 
         const ACTION_READ = 1;
         const ACTION_WRITE = 2;
@@ -97,6 +98,11 @@ class Ext_Databases_Model
                 return $this->_tableName;
         }
 
+        public function fileds()
+        {
+                return array();
+        }
+
         public function rules()
         {
                 return array(
@@ -151,7 +157,18 @@ class Ext_Databases_Model
                 return static::getWriteEngine($this->_tableName)->conn()->getPk($this->_tableName);
         }
 
-        public function setAttributes($key, $value, $type = null)
+        public function setAttributes($attributes)
+        {
+                if ($attributes && is_array($attributes))
+                {
+                        foreach ($attributes as $key => $value)
+                        {
+                                $this->setAttribute($key, $value);
+                        }
+                }
+        }
+
+        public function setAttribute($key, $value, $type = null)
         {
                 if ($this->_isNew)
                 {
@@ -222,11 +239,14 @@ class Ext_Databases_Model
 
         public function insert($new, $options = array())
         {
+                $data = false;
                 if ($this->validation($new))
                 {
-                        $data = static::getWriteEngine($this->_tableName)->conn()->insert($this->_tableName, $new, $options);
-                        if ($data)
+                        $this->_pk = static::getWriteEngine($this->_tableName)->conn()->insert($this->_tableName, $new, $options);
+                        if ($this->_pk)
                         {
+                                $condition = array();
+                                $condition[$this->getPk()] = $this->_pk;
                                 $this->_attributes = static::getReadEngine($this->_tableName)->conn()->findOne($this->_tableName, $condition, $options);
                                 $this->_isNew = $this->_attributes ? FALSE : TRUE;
                                 return $this;
