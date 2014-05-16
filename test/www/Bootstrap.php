@@ -13,7 +13,7 @@ class Bootstrap extends UnPHP_Bootstrap_Abstract {
     /**
      * 注册路由协议
      * @author Xiao Tangren  <unphp@qq.com>
-     * @param Yaf_Dispatcher $dispatcher
+     * @param UnPHP $dispatcher
      */
     public function _initRoute(UnPHP_Dispatcher $dispatcher) {
         $default_route = new UnPHP_Route_Simple("m", 'c', 'a');
